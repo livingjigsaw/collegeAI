@@ -1,9 +1,0 @@
-check cost against max allowed per node, don't follow subtree
-sort from largest to smallest to eliminate larger combinations early
-
-
-make these 4 greedy algs:
-optimal ratios
-highest value
-lowest cost
-partial knapsack upper bound
