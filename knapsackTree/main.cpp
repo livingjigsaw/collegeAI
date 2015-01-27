@@ -115,14 +115,17 @@ int main(){
 			solution.print();
 
 			solution.reset();
-			bool buildSuccess = bruteForce(bruteTree, &itemList, NULL, depthMeter, costLimit, solution);
-			if(!buildSuccess){
+			info.optims[0]=false;
+			info.optims[1]=false;			
+			bool buildtwo = solveKnap(bruteTree, &itemList, NULL, info, solution, 0);
+			if(!buildtwo){
 				cout << "Error: build failed by trying to overwrite a child";
 			}
 			else{
 				cout << endl << "The bruteForce of items:\n";
 				solution.print();
 			}
+			
 		}
 	}
 }

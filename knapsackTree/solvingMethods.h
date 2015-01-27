@@ -20,7 +20,6 @@ bool bruteForce(BST<set<knapItem*> >* outTree, vector<knapItem*>* inList, Node<s
 				currentSoln.itemNames.insert( (*it)->name );
 			}
 		}
-		return true;
 	}
 	else{
 		//if root, current needs to be set
@@ -32,6 +31,7 @@ bool bruteForce(BST<set<knapItem*> >* outTree, vector<knapItem*>* inList, Node<s
 		depth++;
 		bool leftSuccess=outTree->addLeftNode(current, current->get_data() );
 		if(!leftSuccess){
+			cout << "left fail\n";
 			return false;
 		}
 		bruteForce(outTree, inList, current->get_lchild(), depth, costLimit, currentSoln);
@@ -42,11 +42,12 @@ bool bruteForce(BST<set<knapItem*> >* outTree, vector<knapItem*>* inList, Node<s
 		bool rightSuccess = outTree->addRightNode(current, *tempSet);
 		if(!rightSuccess){
 			return false;
+			cout << "right fail\n";
 		}
 		bruteForce(outTree, inList, current->get_rchild(), depth, costLimit, currentSoln);
-
 	}
 	outTree->removeNode(current);
+	return true;
 }
 
 bool solveKnap(BST<set<knapItem*> >* outTree, vector<knapItem*>* inList, Node<set<knapItem*> >* current, treeData inData, Answer& currentSoln, int depth){	
@@ -89,7 +90,6 @@ bool solveKnap(BST<set<knapItem*> >* outTree, vector<knapItem*>* inList, Node<se
 				currentSoln.itemNames.insert( (*it)->name );
 			}
 		}
-		return true;
 	}
 	else{
 		inData.currentPotential-=(*inList)[depth]->value;
@@ -106,6 +106,7 @@ bool solveKnap(BST<set<knapItem*> >* outTree, vector<knapItem*>* inList, Node<se
 			*tempSet = current->get_data();
 			tempSet->insert( (*inList)[depth] );
 			bool rightSuccess=outTree->addRightNode(current, *tempSet);
+			delete tempSet;
 			if(!rightSuccess){
 				return false;
 			}
@@ -113,4 +114,6 @@ bool solveKnap(BST<set<knapItem*> >* outTree, vector<knapItem*>* inList, Node<se
 		}
 
 	}
+	outTree->removeNode(current);
+	return true;
 }

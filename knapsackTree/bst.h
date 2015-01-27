@@ -10,8 +10,8 @@ class Node{
 	public:
 		Node(){data=new T;lchild=NULL;rchild=NULL;};
 		Node(T indata){data=new T;*data=indata;lchild=NULL;rchild=NULL;};
-		~Node(){		//child nodes reach end of lifetime, and should be getting deleted
-			delete data;
+		~Node(){delete data;		//child nodes reach end of lifetime, and should be getting deleted
+		
 		};
 
 
