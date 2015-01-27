@@ -1,6 +1,8 @@
 #include<iostream>
 #include<fstream>
 #include<sstream>
+#include"bst.h"
+#include"containers.h"
 #include"greedy.h"
 #include"solvingMethods.h"
 using namespace std;
@@ -68,10 +70,9 @@ void printList(vector<knapItem*> inList){
 int main(){
 	int costLimit;
 	vector<knapItem*> itemList; //pointers, as the operators in a vector should already exist for pointers
-	
-	double upperbound, lowerbound;
 
 	BST<set<knapItem*> >* myTree= new BST<set<knapItem*> >(); //by storing a set of pointers in the leaf nodes, the set will still stop identical insertion without having to overload comparison operators, hopefully
+	BST<set<knapItem*> >* bruteTree= new BST<set<knapItem*> >(); //by storing a set of pointers in the leaf nodes, the set will still stop identical insertion without having to overload comparison operators, hopefully
 
 	bool success= parseFile(&itemList, &costLimit);
 	
@@ -79,25 +80,49 @@ int main(){
 		cout << "Error: a file by the name given was not able to be opened\n";
 	}
 	else{
+		gAnswers greedy;
+		greedyAnswers(itemList, costLimit, greedy);
+		cout << "Greedy cost soln:\n";
+		greedy.cost.print();
+		cout << "Greedy value soln:\n";
+		greedy.value.print();
+		cout << "Greedy ratio soln:\n";
+		greedy.ratio.print();
+		cout << "Greedy partial soln, the last item was only partially included:\n";
+		greedy.partial.print();
+
+		greedy.findBest();
 		int depthMeter =0;
-		bool buildSuccess = buildTree(myTree, &itemList, NULL, depthMeter);
+		treeData info;
+		info.reset();
+		info.costLimit=costLimit;
+		info.upperBound=greedy.partial.totalValue;
+		info.lowerBound=greedy.bestVal;
+		info.optims[0]=true;
+		info.optims[1]=true;
+		for(int i=0;i<itemList.size();i++){
+			info.currentPotential += itemList[i]->value; 
+		}
+		Answer solution;
+		solution.reset();
+		bool buildSuccess = solveKnap(myTree, &itemList, NULL, info, solution, 0);
 		if(!buildSuccess){
 			cout << "Error: build failed by trying to overwrite a child";
 		}
 		else{
-		Answer solution;
-		solution.totalCost=0;solution.totalValue=0;
-		getAnswer(myTree, myTree->get_root(), costLimit, solution);
-		cout << endl << "The best combination of items:\n";
-		set<string>::iterator it;
-		for(it=solution.itemNames.begin();it!=solution.itemNames.end();it++){
-			cout << *it << ", ";
-		}
-		cout << endl;
-		cout << "the cost = " << solution.totalCost << endl; 
-		cout << "the value = " << solution.totalValue << endl <<endl; 
-		}
+		
+			cout << endl << "The solveKnap of items:\n";
+			solution.print();
 
-		greedyAnswers(itemList, costLimit);
+			solution.reset();
+			bool buildSuccess = bruteForce(bruteTree, &itemList, NULL, depthMeter, costLimit, solution);
+			if(!buildSuccess){
+				cout << "Error: build failed by trying to overwrite a child";
+			}
+			else{
+				cout << endl << "The bruteForce of items:\n";
+				solution.print();
+			}
+		}
 	}
 }

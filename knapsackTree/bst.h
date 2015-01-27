@@ -12,13 +12,8 @@ class Node{
 		Node(T indata){data=new T;*data=indata;lchild=NULL;rchild=NULL;};
 		~Node(){		//child nodes reach end of lifetime, and should be getting deleted
 			delete data;
-			if(lchild!=NULL){
-				delete lchild;
-			}
-			if(rchild!=NULL){
-				delete rchild;
-			}
 		};
+
 
 		void set_data(T input){*data=input;};
 		void set_lchild(T input);
@@ -55,6 +50,7 @@ class BST{
 
 		bool addLeftNode(Node<T>* current, T input);
 		bool addRightNode(Node<T>* current, T input);
+		void removeNode(Node<T>* current){delete current;}; //USE WITH CAUTION
 
 		//bool buildStandardTree(); // to be implemented someday
 		//bool buildDataDependantTree(Node<T>* current, T data); //this meets specific non-standard requirements

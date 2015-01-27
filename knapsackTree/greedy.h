@@ -1,4 +1,4 @@
-#include"containers.h"
+
 using namespace std;
 
 void sortCost(vector<knapItem*>& costsort, int leftBound, int rightBound){ //recursive, call with 0 and size - 1 the first time
@@ -94,7 +94,7 @@ void sortRatio(vector<knapItem*>& ratiosort, int leftBound, int rightBound){ //r
 	sortRatio(ratiosort, wall+1, rightBound);
 }
 
-void greedyAnswers(vector<knapItem*> original, int costLimit){
+void greedyAnswers(vector<knapItem*> original, int costLimit, gAnswers& gAns){
 	vector<knapItem*> costList = original;
 	vector<knapItem*> valList = original;
 	vector<knapItem*> ratList = original; //to be sorted variations of the original list
@@ -105,62 +105,54 @@ void greedyAnswers(vector<knapItem*> original, int costLimit){
 	sortValue(valList, 0, valList.size()-1);
 	sortRatio(ratList, 0, ratList.size()-1);
 
-	Answer sol;	
-	sol.reset();
+	gAns.cost.reset();
 	//cost greedy
 	for(int i=0;i<costList.size();i++){
-		if(sol.totalCost+costList[i]->cost <=costLimit){
-			sol.totalCost+=costList[i]->cost;
-			sol.totalValue+=costList[i]->value;
-			sol.itemNames.insert(costList[i]->name);
+		if(gAns.cost.totalCost+costList[i]->cost <=costLimit){
+			gAns.cost.totalCost+=costList[i]->cost;
+			gAns.cost.totalValue+=costList[i]->value;
+			gAns.cost.itemNames.insert(costList[i]->name);
 		}
 	}
-	cout << "Greedy cost soln:\n";
-	sol.print();
 	// clear solution
-	sol.reset();
+	gAns.value.reset();
 	//value greedy
 	for(int i=0;i<valList.size();i++){
-		if(sol.totalCost+valList[i]->cost <=costLimit){
-			sol.totalCost+=valList[i]->cost;
-			sol.totalValue+=valList[i]->value;
-			sol.itemNames.insert(valList[i]->name);
+		if(gAns.value.totalCost+valList[i]->cost <=costLimit){
+			gAns.value.totalCost+=valList[i]->cost;
+			gAns.value.totalValue+=valList[i]->value;
+			gAns.value.itemNames.insert(valList[i]->name);
 		}
 	}
-	cout << "Greedy val soln\n";
-	sol.print();
 	// clear solution
-	sol.reset();
+	gAns.ratio.reset();
 	//ratio greedy
 	for(int i=0;i<ratList.size();i++){
-		if(sol.totalCost+ratList[i]->cost <=costLimit){
-			sol.totalCost+=ratList[i]->cost;
-			sol.totalValue+=ratList[i]->value;
-			sol.itemNames.insert(ratList[i]->name);
+		if(gAns.ratio.totalCost+ratList[i]->cost <=costLimit){
+			gAns.ratio.totalCost+=ratList[i]->cost;
+			gAns.ratio.totalValue+=ratList[i]->value;
+			gAns.ratio.itemNames.insert(ratList[i]->name);
 		}
 	}
-	cout << "Greedy ratio soln:\n";
-	sol.print(); 
+
 	// clear solution
-	sol.reset();
+	gAns.partial.reset();
 	//partial knapsack
 	for(int i=0;i<ratList.size();i++){
-		if(sol.totalCost==costLimit){
+		if(gAns.partial.totalCost==costLimit){
 			break;
 		}
-		else if(sol.totalCost+ratList[i]->cost <= costLimit){
-			sol.totalCost+=ratList[i]->cost;
-			sol.totalValue+=ratList[i]->value;
-			sol.itemNames.insert(ratList[i]->name);
+		else if(gAns.partial.totalCost+ratList[i]->cost <= costLimit){
+			gAns.partial.totalCost+=ratList[i]->cost;
+			gAns.partial.totalValue+=ratList[i]->value;
+			gAns.partial.itemNames.insert(ratList[i]->name);
 		}
-		else if(sol.totalCost+ratList[i]->cost > costLimit){
-			double remains = costLimit - sol.totalCost;
-			sol.totalValue+= remains * (double)ratList[i]->ratio;
+		else if(gAns.partial.totalCost+ratList[i]->cost > costLimit){
+			double remains = costLimit - gAns.partial.totalCost;
+			gAns.partial.totalValue+= remains * (double)ratList[i]->ratio;
 
-			sol.totalCost+=remains;
-			cout << "item "<< ratList[i]->name << " was partially included\n";
+			gAns.partial.totalCost+=remains;
+			gAns.partial.itemNames.insert(ratList[i]->name);
 		}
 	}
-	cout << "upper bound from partial knapsack:\n";
-	sol.print(); 
 }
