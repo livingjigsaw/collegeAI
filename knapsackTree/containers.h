@@ -22,7 +22,7 @@ struct Answer{
 		itemNames.clear();
 	}
 
-	void print(){
+	void print(bool nodes){
 		set<string>::iterator it;
 		cout<< "items in answer:\n";
 		for(it=itemNames.begin();it!=itemNames.end();it++){
@@ -31,7 +31,10 @@ struct Answer{
 		cout << endl;
 		cout << "the cost = " << totalCost << endl; 
 		cout << "the value = " << totalValue << endl <<endl; 
-		cout << "the number of nodes = " << nodeCount << endl <<endl; 
+		if(nodes){
+			cout << "the number of nodes = " << nodeCount << endl <<endl; 	
+		}
+		
 	}
 };
 

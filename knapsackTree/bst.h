@@ -44,13 +44,14 @@ class BST{
 	public:
 		BST(){root=new Node<T>();};
 		BST(T rootData){root=new Node<T>(rootData);};
-		~BST(){delete root;};
+		~BST(){delete root;root=NULL;};
 
 		Node<T>* get_root(){return root;};
+		void rebuild(){root=new Node<T>();};
 
 		bool addLeftNode(Node<T>* current, T input);
 		bool addRightNode(Node<T>* current, T input);
-		void removeNode(Node<T>* current){delete current;}; //USE WITH CAUTION
+		void removeNode(Node<T>* current){delete current;current=NULL;}; //USE WITH CAUTION
 
 		//bool buildStandardTree(); // to be implemented someday
 		//bool buildDataDependantTree(Node<T>* current, T data); //this meets specific non-standard requirements

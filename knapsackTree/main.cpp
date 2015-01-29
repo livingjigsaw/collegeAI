@@ -56,6 +56,129 @@ bool parseFile(vector<knapItem*>* outList, int* outCost ){
 	}
 }
 
+bool handleCommand(string input, BST<set<knapItem*> >* inTree, gAnswers greedy, treeData inData, int costLimit, vector<knapItem*> itemList, Answer solution){
+	cout << "\nWhat would you like to do? Type \"help\" to see possible commands\n \n";
+	cin >> input;
+	int inSwitch = -1; 
+	if(input=="exit"){inSwitch=0;}
+	else if(input=="help"){inSwitch=1;}
+	else if(input=="greedy"){inSwitch=2;}
+	else if(input=="brute"){inSwitch=3;}
+	else if(input=="lhoptim"){inSwitch=4;}
+	else if(input=="rhoptim"){inSwitch=5;}
+	else if(input=="bothoptim"){inSwitch=6;}
+	else if(input=="newfile"){inSwitch=7;}
+	else{inSwitch=8;}
+	switch (inSwitch){
+		case 0:
+			return true; // if program returns true, we leave command loop, false will return if end of code is reached
+			break;
+		case 1:
+		{
+			cout << "Accepted commands are:\n";
+			cout << "help - shows list of valid commands \n";
+			cout << "greedy - shows solutions from all of the greedy algorithms\n";
+			cout << "brute - performs the exhaustive search for the optimal \n";
+			cout << "lhoptim - performs search with the lower bound optimization \n";
+			cout << "rhoptim - performs search with the cost limit optimization \n";
+			cout << "bothoptim - performs search using both optimizations \n";
+			cout << "newfile - read in a different data file \n";
+			cout << "exit - ends the program \n";
+			break;
+		}
+		case 2:
+		{
+			cout << "Greedy cost soln:\n";
+			greedy.cost.print(0); //0 for false, to tell the solution not to print number of nodes
+			cout << "Greedy value soln:\n";
+			greedy.value.print(0);
+			cout << "Greedy ratio soln:\n";
+			greedy.ratio.print(0);
+			cout << "Greedy partial soln:\n";
+			greedy.partial.print(0);
+			break;
+		}
+		case 3:
+		{
+			inData.optims[0]=false;
+			inData.optims[1]=false;
+			solution.reset();
+			bool buildSuccess = solveKnap(inTree, &itemList, NULL, inData, solution, 0);
+			if(!buildSuccess){
+				cout << "Error: tree failed to build";
+			}
+			else{
+				cout << endl << "The bruteforce solution:\n";
+				solution.print(1);
+			}
+			inTree->rebuild();
+			break;
+		}
+		case 4:
+		{
+			inData.optims[0]=true;
+			inData.optims[1]=false;
+			solution.reset();
+			bool buildSuccess = solveKnap(inTree, &itemList, NULL, inData, solution, 0);
+			if(!buildSuccess){
+				cout << "Error: tree failed to build";
+			}
+			else{
+				cout << endl << "The solution with the lower bound optimization:\n";
+				solution.print(1);
+			}
+			inTree->rebuild();
+			break;
+		}
+		case 5:
+		{
+			inData.optims[0]=false;
+			inData.optims[1]=true;
+			solution.reset();
+			bool buildSuccess = solveKnap(inTree, &itemList, NULL, inData, solution, 0);
+			if(!buildSuccess){
+				cout << "Error: tree failed to build";
+			}
+			else{
+				cout << endl << "The solution with the costLimit optimization:\n";
+				solution.print(1);
+			}
+			inTree->rebuild();
+			break;
+		}
+		case 6:
+		{
+			inData.optims[0]=true;
+			inData.optims[1]=true;
+			Answer solution;	
+			solution.reset();
+			bool buildSuccess = solveKnap(inTree, &itemList, NULL, inData, solution, 0);
+			if(!buildSuccess){
+				cout << "Error: tree failed to build";
+			}
+			else{
+				cout << endl << "The solution with both optimizations:\n";
+				solution.print(1);
+			}
+			inTree->rebuild();
+			break;
+		}
+		case 7:
+		{
+			bool success=parseFile(&itemList, &costLimit);
+			while(!success){ 	
+				cout << "Sorry, a file by that name was not found\n";
+				success=parseFile(&itemList, &costLimit);		
+			}
+			break;
+		}
+		default:
+			cout << "sorry, that command is not valid. please try again\n";
+			break;
+		return false;
+	} 
+}
+
 void printList(vector<knapItem*> inList){
 	for(int i=0;i<inList.size();i++){
 		cout << inList[i]->name << ", ";
@@ -72,60 +195,34 @@ int main(){
 	vector<knapItem*> itemList; //pointers, as the operators in a vector should already exist for pointers
 
 	BST<set<knapItem*> >* myTree= new BST<set<knapItem*> >(); //by storing a set of pointers in the leaf nodes, the set will still stop identical insertion without having to overload comparison operators, hopefully
-	BST<set<knapItem*> >* bruteTree= new BST<set<knapItem*> >(); //by storing a set of pointers in the leaf nodes, the set will still stop identical insertion without having to overload comparison operators, hopefully
 
-	bool success= parseFile(&itemList, &costLimit);
-	
-	if(!success){
-		cout << "Error: a file by the name given was not able to be opened\n";
+	bool success=parseFile(&itemList, &costLimit);
+	while(!success){ 	
+		cout << "Sorry, a file by that name was not found\n";
+		success=parseFile(&itemList, &costLimit);		
 	}
-	else{
-		gAnswers greedy;
-		greedyAnswers(itemList, costLimit, greedy);
-		cout << "Greedy cost soln:\n";
-		greedy.cost.print();
-		cout << "Greedy value soln:\n";
-		greedy.value.print();
-		cout << "Greedy ratio soln:\n";
-		greedy.ratio.print();
-		cout << "Greedy partial soln, the last item was only partially included:\n";
-		greedy.partial.print();
+	//execute greedy algs here, commands will simply ask for solution
+	gAnswers greedy;
+	greedyAnswers(itemList, costLimit, greedy);
+	greedy.findBest();
 
-		greedy.findBest();
-		int depthMeter =0;
-		treeData info;
-		info.reset();
-		info.costLimit=costLimit;
-		info.upperBound=greedy.partial.totalValue;
-		info.lowerBound=greedy.bestVal;
-		info.optims[0]=true;
-		info.optims[1]=true;
-		for(int i=0;i<itemList.size();i++){
-			info.currentPotential += itemList[i]->value; 
-		}
-		Answer solution;
-		solution.reset();
-		bool buildSuccess = solveKnap(myTree, &itemList, NULL, info, solution, 0);
-		if(!buildSuccess){
-			cout << "Error: build failed by trying to overwrite a child";
-		}
-		else{
-		
-			cout << endl << "The solveKnap of items:\n";
-			solution.print();
-
-			solution.reset();
-			info.optims[0]=false;
-			info.optims[1]=false;			
-			bool buildtwo = solveKnap(bruteTree, &itemList, NULL, info, solution, 0);
-			if(!buildtwo){
-				cout << "Error: build failed by trying to overwrite a child";
-			}
-			else{
-				cout << endl << "The bruteForce of items:\n";
-				solution.print();
-			}
+	//setup treeData
+	int depthMeter =0;
+	treeData info;
+	info.reset();
+	info.costLimit=costLimit;
+	info.upperBound=greedy.partial.totalValue;
+	info.lowerBound=greedy.bestVal;
+	for(int i=0;i<itemList.size();i++){
+		info.currentPotential += itemList[i]->value; 
+	}
+	Answer solution;
+	solution.reset();	
+	bool isExit=false;
+	string command="";
+	while(!isExit){
+		isExit=handleCommand(command, myTree, greedy, info, costLimit, itemList, solution);
+	}
 			
-		}
-	}
+	
 }
