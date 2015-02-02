@@ -56,7 +56,7 @@ bool parseFile(vector<knapItem*>* outList, int* outCost ){
 	}
 }
 
-bool handleCommand(string input, BST<set<knapItem*> >* inTree, gAnswers greedy, treeData inData, int costLimit, vector<knapItem*> itemList, Answer solution){
+bool handleCommand(string input, BST<set<knapItem*> >* &inTree, gAnswers &greedy, treeData &inData, int &costLimit, vector<knapItem*> &itemList, Answer &solution){
 	cout << "\nWhat would you like to do? Type \"help\" to see possible commands\n \n";
 	cin >> input;
 	int inSwitch = -1; 
@@ -165,11 +165,22 @@ bool handleCommand(string input, BST<set<knapItem*> >* inTree, gAnswers greedy, 
 		}
 		case 7:
 		{
+			itemList.clear();
 			bool success=parseFile(&itemList, &costLimit);
 			while(!success){ 	
 				cout << "Sorry, a file by that name was not found\n";
 				success=parseFile(&itemList, &costLimit);		
 			}
+			greedyAnswers(itemList, costLimit, greedy);
+			greedy.findBest();
+			inData.reset();
+			inData.costLimit=costLimit;
+			inData.upperBound=greedy.partial.totalValue;
+			inData.lowerBound=greedy.bestVal;
+			for(int i=0;i<itemList.size();i++){
+				inData.currentPotential += itemList[i]->value; 
+			}
+			solution.reset();
 			break;
 		}
 		default:
@@ -207,7 +218,6 @@ int main(){
 	greedy.findBest();
 
 	//setup treeData
-	int depthMeter =0;
 	treeData info;
 	info.reset();
 	info.costLimit=costLimit;
