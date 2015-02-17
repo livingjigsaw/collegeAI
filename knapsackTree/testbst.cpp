@@ -42,7 +42,6 @@ int main(){
 	assert(rchild->get_lchild()==NULL);
 	assert(rchild->get_rchild()==NULL);
 	delete nodeTest;
-	assert(rchild->get_data()!=2); //this should prove if children get deleted correctly
 	/*
 	----------------------------------------------------------------------------------------------------------------
 	end node testing
