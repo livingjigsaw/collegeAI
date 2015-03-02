@@ -9,7 +9,6 @@ struct knapItem{
 	string name;
 	int cost;
 	int value;
-	//double ratio; no need, since greedy alds are not planned on being used
 };
 
 struct Answer{
@@ -44,47 +43,86 @@ class Candidate{
 	
 	public:
 		//constructors/destructors
-		Candidate(){};	//so the array isn't created for child generation
+		Candidate(){}	//so the array isn't created for child generation
 		Candidate(int inSize){
 			for(int i=0;i<inSize;i++){
 				sack.insert(sack.end(), rand()%2);
 			}
-		};
+		}
 
-		~Candidate(){};
+		~Candidate(){}
 
 		//methods
-		int get_sackSize(){return sack.size();};
-		int get_item(int index){return sack[index];};
-		double get_fit(){return fitness;};
-		void insert(bool in){sack.insert(sack.end(), in);};
+		int get_sackSize(){return sack.size();}
+		bool get_item(int index){return sack[index];}
+		double get_fit(){return fitness;}
+		void insert(bool in){sack.insert(sack.end(), in);}
 
-		void set_fit(double inFit){fitness=inFit;};
+		void set_fit(double inFit){fitness=inFit;}
 		void print(){
 			for(int i=0;i<sack.size();i++){
 				cout<<sack[i];
 			}
-		};
-		//void becomeChild(){}; //weird, but it will take two parents and crossover self
-};
+			cout<< "  Fitness = " << fitness << endl;
+		}
+
+		void mutate(){
+			int loc = rand()%sack.size();
+			if(sack[loc]){
+				sack[loc]=false;
+			}
+			else{
+				sack[loc]=true;
+			}
+		}
+
+		void operator=(Candidate &rhs){
+			fitness=rhs.get_fit();
+			sack.clear();
+			for(int i=0;i<rhs.get_sackSize();i++){
+				insert(rhs.get_item(i));
+			}
+		}
+
+		bool operator ==(Candidate &rhs){
+			for(int i=0;i<sack.size();i++){
+				if(sack[i]!=rhs.get_item(i)){
+					return false;
+				}
+			}
+			return true;
+		}
+		bool operator !=(Candidate &rhs){
+			for(int i=0;i<sack.size();i++){
+				if(sack[i]!=rhs.get_item(i)){
+					return true;
+				}
+			}
+			return false;
+		}
+	};
+		
 
 class Population{
 	private:
 		int costLimit;
 		vector<Candidate*> current;
 		vector<knapItem*> itemList;
+		int hmgCount;
+		Candidate* hmgCan; 	//to know which candidate was the homogeneous candidtate from before
 	public:
-		Population(){};
+		Population(){hmgCount=0;hmgCan=NULL;}
 		Population(int inSize){
+			hmgCount=0;hmgCan=NULL;
 			for(int i=0;i<inSize;i++){ 
 				current.insert(current.end(), NULL);
 			}
-		};
-		~Population(){};
+		}
+		~Population(){}
 
 		void insertMem(Candidate* inCan){
 			for(vector<Candidate*>::iterator it=current.begin();it<current.end();it++){
-				if( (*it)==NULL || inCan->get_fit()> (*it)->get_fit()){
+				if( (*it)==NULL || inCan->get_fit()> (*it)->get_fit() || (inCan->get_fit()==(*it)->get_fit() && *inCan == *(*it) )  ){
 					current.insert( it , inCan);
 					delete *current.end();
 					current.pop_back();
@@ -92,13 +130,19 @@ class Population{
 				}
 			}
 			delete inCan;
-		};
+		}
 
 		void set_itemList(vector<knapItem*> inList){
 			itemList=inList;
-		};
+		}
 
-		void set_costLimit(int inLimit){costLimit=inLimit;};
+		void set_costLimit(int inLimit){costLimit=inLimit;}
+		int get_costLimit(){return costLimit;}
+		void set_hmgCount(int inCount){hmgCount=inCount;}
+		int get_hmgCount(){return hmgCount;}
+		void inc_hmgCount(){hmgCount++;}
+
+
 
 		void fitEval(Candidate* inCan){
 			Answer temp;
@@ -125,13 +169,7 @@ class Population{
 				fitEval(soln);
 				insertMem(soln);
 			}
-		};
-
-		void printAllFit(){
-			for(int i=0;i<current.size();i++){ 
-				cout << current[i]->get_fit() << endl;
-			}
-		};
+		}
 
 		void printAll(){
 			for(int i=0;i<current.size();i++){ 
@@ -139,64 +177,142 @@ class Population{
 				current[i]->print();
 				cout << " fitness = " << current[i]->get_fit() << endl;
 			}
-		};
+		}
 
 		void printMember(int index){
 			current[index]->print();
-		};
+		}
 		double getMemberFit(int index){
 			return current[index]->get_fit();
-		};
+		}
 
-		void createChild(){
+		void createChild(int reps){ //I want to have a higher chance of picking the higher numbers as time progresses, to eliminate competing strains
 			int maxChance = (double)(current.size()-1)*(double)(current.size())/2; //equivalent to the sum of 1 to 100, but shifted to be the sum of 1 to 99 (trivially 0 to 99)
 			double p[2] = {0};
 			//select the parents
-			p[0]=(99 - floor(sqrt(2*(rand()%maxChance))));
-			p[1]=(99 - floor(sqrt(2*(rand()%maxChance))));
-			cout << "parent Cand 1 = " << p[0] << endl;
-			cout << "parent Cand 2 = " << p[1] << endl;
-			while(p[0]==p[1]){ 			//this should only fire if the same parent was chosen twice
-			p[1]=(99 - floor(sqrt(2*(rand()%maxChance))));
-				cout << "member " << p[0] << " was picked again!\n";
-				cout << "parent Cand 2 = " << p[1] << endl;
+			if(reps<10000){
+				p[0]=((current.size()-1) - floor(sqrt(2*(rand()%maxChance))));
+				p[1]=((current.size()-1) - floor(sqrt(2*(rand()%maxChance))));
+
+				//cout << "parent Cand 1 = " << p[0] << endl;
+				//cout << "parent Cand 2 = " << p[1] << endl;
+				while(p[0]==p[1]){ 			//this should only fire if the same parent was chosen twice
+				p[1]=((current.size()-1) - floor(sqrt(2*(rand()%maxChance))));
+					//cout << "member " << p[0] << " was picked again!\n";
+					//cout << "parent Cand 2 = " << p[1] << endl;
+				}
+				//cout << "\nParent 1 = ";
+				//current[p[0]]->print();
+				//cout << " fitness = " << current[p[0]]->get_fit() << endl;
+
+				//cout << "Parent 2 = ";
+				//current[p[1]]->print();
+				//cout << " fitness = " << current[p[1]]->get_fit() << endl;
+
+				/*
+				breakdown of the math:
+				let n be an integer denoting a possible parent position in the vector
+				let X be the sum of 1 to n
+				X = (n/2)*(n+1), which is maxchance if n= vector size
+				after generating a random n no larger than size, we solve for X:
+				n^2 + n = X*2
+				using the quadratic formula:
+				-1 (+ or -) sqrt(1-4*1*(-X*2))/2
+				a and b will always be 1, so let's approximate by removing the ones to simplify
+				sqrt(-X*2) the four can come out of the sqrt and cancel the denominator
+				this ranges to above the desired range, so the floor keeps the approximation in bounds
+				therefore, the range of numbers that equate to larger numbers should be higher, and we simply have to additively inverse it with 100
+				*/
 			}
-			cout << "\nParent 1 = ";
-			current[p[0]]->print();
-			cout << " fitness = " << current[p[0]]->get_fit() << endl;
-
-			cout << "Parent 2 = ";
-			current[p[1]]->print();
-			cout << " fitness = " << current[p[1]]->get_fit() << endl;
-
-			/*
-			breakdown of the math:
-			let n be an integer denoting a possible parent position in the vector
-			let X be the sum of 1 to n
-			X = (n/2)*(n+1), which is maxchance if n= vector size
-			after generating a random n no larger than size, we solve for X:
-			n^2 + n = X*2
-			using the quadratic formula:
-			-1 (+ or -) sqrt(1-4*1*(-X*2))/2
-			a and b will always be 1, so let's approximate by removing the ones to simplify
-			sqrt(-X*2) the four can come out of the sqrt and cancel the denominator
-			this ranges to above the desired range, so the floor keeps the approximation in bounds
-			therefore, the range of numbers that equate to larger numbers should be higher, and we simply have to additively inverse it with 100
-			*/
-
+			else{
+				p[0]=0;
+				p[1]=0;
+			}
 			//create child
 			Candidate* child= new Candidate;
 			int tempSackSize = current[ p[0] ]->get_sackSize();
 			for(int i=0; i<tempSackSize;i++){
-				int parent = rand()%2;
+				int parent = i%2;
 				child->insert(current[p[parent]]->get_item(i));
 			}
 			//eval fitness
 			fitEval(child);
-			cout << "Child = ";
-			child->print();
-			cout << " fitness = " << child->get_fit() << endl << endl;
+			//cout << "Child = ";
+			//child->print();
+			//cout << " fitness = " << child->get_fit() << endl << endl;
 			//insert child into population
 			insertMem(child);
+		}
+
+		bool hmgFit(){
+			int currentFit=current[0]->get_fit();
+			for(int i=0;i<current.size();i++){ 
+				if(currentFit!=current[i]->get_fit()){
+					return false;
+				}
+			}
+			return true; 
+		}
+
+		bool isHmg(){
+			Candidate tempCan;
+			if (!hmgFit()){
+				return false;
+			}
+			else{
+				tempCan= *(current[0]);
+				for(int i=0;i<current.size();i++){
+					if(tempCan != *(current[i]) ){
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+
+		void cataMutation(){
+			int popSize = current.size();
+			int half = (current[0]->get_sackSize())/2;
+			for(int i=popSize-1;i>0;i--){	//leave one intact
+				delete current[i];
+				current[i]=NULL;
+			}
+			for(int i=1;i<popSize;i++){	//leave one intact
+				Candidate* tempCan = new Candidate();
+				*tempCan = *current[0];	
+				for(int j=0;j<half;j++){
+					tempCan->mutate();
+				}
+				fitEval(tempCan);
+				insertMem(tempCan);
+			}
+		}
+
+		void genitor(){
+			int catams=0, totalChildren=0;
+			while(get_hmgCount()<3){
+				int reps=0;
+				while(!isHmg()){
+					createChild(reps);
+					reps++;
+				}
+				cout << "isHmg\n";
+				totalChildren +=reps;
+				if( hmgCan==NULL || *hmgCan != *current[0] ){
+					set_hmgCount(1);
+					hmgCan=new Candidate();
+					*hmgCan = *current[0];
+				}
+				else{
+					inc_hmgCount();
+				}
+				cataMutation();
+				catams++;
+				cout << "new generation\n";
+			}
+			cout << totalChildren << " reps\n";
+			cout << catams << "Catacalysmic Mutations\n";
+			cout << "Best Candidate:\n";
+			current[0]->print();
 		}
 };

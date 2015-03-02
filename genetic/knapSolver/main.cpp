@@ -72,11 +72,5 @@ int main(){
 	genitor.set_costLimit(costLimit);
 	genitor.set_itemList(itemList);
 	genitor.randInit();
-
-	genitor.printAll();
-	genitor.createChild();
-	genitor.printAll();
-
-
-	//cout << "Fitness of top candidate = " <<genitor.getMemberFit(0)<<endl;
+	genitor.genitor();
 }
