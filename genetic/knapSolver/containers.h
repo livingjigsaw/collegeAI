@@ -296,7 +296,7 @@ class Population{
 					createChild(reps);
 					reps++;
 				}
-				cout << "isHmg\n";
+				//cout << "isHmg\n";
 				totalChildren +=reps;
 				if( hmgCan==NULL || *hmgCan != *current[0] ){
 					set_hmgCount(1);
@@ -308,10 +308,10 @@ class Population{
 				}
 				cataMutation();
 				catams++;
-				cout << "new generation\n";
+				//cout << "new generation\n";
 			}
-			cout << totalChildren << " reps\n";
-			cout << catams << "Catacalysmic Mutations\n";
+			cout << totalChildren << " children spawned\n";
+			cout << catams << " Catacalysmic Mutations\n";
 			cout << "Best Candidate:\n";
 			current[0]->print();
 		}
