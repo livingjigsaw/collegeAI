@@ -272,7 +272,7 @@ class Population{
 
 		void cataMutation(){
 			int popSize = current.size();
-			int half = (current[0]->get_sackSize())/2;
+			int pctchange = (current[0]->get_sackSize())/2;
 			for(int i=popSize-1;i>0;i--){	//leave one intact
 				delete current[i];
 				current[i]=NULL;
@@ -280,7 +280,7 @@ class Population{
 			for(int i=1;i<popSize;i++){	//leave one intact
 				Candidate* tempCan = new Candidate();
 				*tempCan = *current[0];	
-				for(int j=0;j<half;j++){
+				for(int j=0;j<pctchange;j++){
 					tempCan->mutate();
 				}
 				fitEval(tempCan);

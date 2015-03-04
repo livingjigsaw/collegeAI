@@ -20,6 +20,7 @@ bool parseFile(vector<knapItem*>* outList, int* outCost ){
 		getline(infile, currentLine);
 		ss << currentLine;
 		ss >> *outCost;
+		//cout << "outcost = " << *outCost << endl;
 	
 		//cout << "about to get lines\n";
 		while(getline(infile, currentLine)){
@@ -30,6 +31,7 @@ bool parseFile(vector<knapItem*>* outList, int* outCost ){
 			int tempCost;
 			int tempValue;
 			ss >> parse;
+			//cout << "parse = " << parse << endl;			
 			while(parse!=','){
 				//cout << "parse = " << parse << endl;
 				tempName += parse;
