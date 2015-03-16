@@ -59,6 +59,7 @@ class Candidate{
 		void insert(bool in){sack.insert(sack.end(), in);}
 
 		void set_fit(double inFit){fitness=inFit;}
+		void reset(){sack.clear();fitness=0;}
 		void print(){
 			for(int i=0;i<sack.size();i++){
 				cout<<sack[i];
@@ -108,12 +109,13 @@ class Population{
 		int costLimit;
 		vector<Candidate*> current;
 		vector<knapItem*> itemList;
+		int evalCount;
 		int hmgCount;
 		Candidate* hmgCan; 	//to know which candidate was the homogeneous candidtate from before
 	public:
-		Population(){hmgCount=0;hmgCan=NULL;}
+		Population(){hmgCount=0;hmgCan=NULL;evalCount=0;}
 		Population(int inSize){
-			hmgCount=0;hmgCan=NULL;
+			hmgCount=0;hmgCan=NULL;evalCount=0;
 			for(int i=0;i<inSize;i++){ 
 				current.insert(current.end(), NULL);
 			}
@@ -124,7 +126,9 @@ class Population{
 			for(vector<Candidate*>::iterator it=current.begin();it<current.end();it++){
 				if( (*it)==NULL || inCan->get_fit()> (*it)->get_fit() || (inCan->get_fit()==(*it)->get_fit() && *inCan == *(*it) )  ){
 					current.insert( it , inCan);
-					delete *current.end();
+					if((current.back())!=NULL){
+						delete current.back();
+					}
 					current.pop_back();
 					return;
 				}
@@ -161,12 +165,19 @@ class Population{
 				double fitness=temp.totalValue;
 				inCan->set_fit(fitness);		//may do more math to fitness, not decided yet
 			}
+			evalCount++;
 		}
 
 		void randInit(){
 			for(int i=0;i<current.size();i++){
-				Candidate* soln= new Candidate(itemList.size());
-				fitEval(soln);
+				Candidate* soln=NULL;
+				double curFit=0;
+				while(curFit==0){
+					delete soln;
+					soln= new Candidate(itemList.size());
+					fitEval(soln);
+					curFit=soln->get_fit();
+				}
 				insertMem(soln);
 			}
 		}
@@ -189,7 +200,11 @@ class Population{
 		void createChild(int reps){ //I want to have a higher chance of picking the higher numbers as time progresses, to eliminate competing strains
 			int maxChance = (double)(current.size()-1)*(double)(current.size())/2; //equivalent to the sum of 1 to 100, but shifted to be the sum of 1 to 99 (trivially 0 to 99)
 			double p[2] = {0};
+			double curFit=0;
+			Candidate* child= new Candidate;
 			//select the parents
+			while(curFit==0){
+				child->reset();
 			if(reps<10000){
 				p[0]=((current.size()-1) - floor(sqrt(2*(rand()%maxChance))));
 				p[1]=((current.size()-1) - floor(sqrt(2*(rand()%maxChance))));
@@ -229,14 +244,19 @@ class Population{
 				p[1]=0;
 			}
 			//create child
-			Candidate* child= new Candidate;
 			int tempSackSize = current[ p[0] ]->get_sackSize();
 			for(int i=0; i<tempSackSize;i++){
 				int parent = i%2;
 				child->insert(current[p[parent]]->get_item(i));
 			}
+			//possibility to mutate
+			if(rand()%100 < 5){
+				child->mutate();
+			}
 			//eval fitness
 			fitEval(child);
+			curFit=child->get_fit();
+		}
 			//cout << "Child = ";
 			//child->print();
 			//cout << " fitness = " << child->get_fit() << endl << endl;
@@ -310,7 +330,7 @@ class Population{
 				catams++;
 				//cout << "new generation\n";
 			}
-			cout << totalChildren << " children spawned\n";
+			cout << evalCount << " fitness evaluations performed\n";
 			cout << catams << " Catacalysmic Mutations\n";
 			cout << "Best Candidate:\n";
 			current[0]->print();

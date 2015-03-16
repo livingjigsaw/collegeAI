@@ -10,10 +10,10 @@ echo("enter the maximum possible value\n");
 fscanf(STDIN, "%d\n", $maxVal);
 echo("enter the number of items in the sack\n");
 fscanf(STDIN, "%d\n", $numItems);
-$fileOut = fopen("knapout.txt", "wb");
+$fileOut = fopen("phpKnapOut.csv", "w");
 //make a good costlimit
-$costLimit=$numItems*$minCost;
-$costLimit.=PHP_EOL;
+$costLimit=floor($numItems*($minCost+$maxCost)/4);
+$costLimit.="\r\n";
 fwrite($fileOut, $costLimit);
 for($i=0;$i<$numItems;$i++){
 	$array=array();
@@ -30,7 +30,7 @@ for($i=0;$i<$numItems;$i++){
 	}
 	$myCost=rand($minCost, $maxCost);
 	$myVal = rand($minVal, $maxVal);
-	$nextLine= $name.",".$myCost.",".$myVal.PHP_EOL;
+	$nextLine= $name.",".$myCost.",".$myVal."\r\n";
 	fwrite($fileOut, $nextLine);
 }
 $bool=fclose($fileOut);

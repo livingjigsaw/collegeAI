@@ -1,0 +1,4 @@
+k100.csv
+greedy
+bothoptim
+exit

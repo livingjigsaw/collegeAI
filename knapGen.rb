@@ -9,10 +9,10 @@ print "enter the maximum possible value\n"
 maxVal =gets.to_i
 print "enter the number of items in the sack\n"
 numItems =gets.to_i
-fileOut = File.new("knapout.csv", "w")
+fileOut = File.new("rubyKnapOut.csv", "w")
 #make a good costlimit
-costLimit=numItems * minCost
-fileOut << costLimit << "\n"
+costLimit=(numItems * (minCost+maxCost)/4).floor
+fileOut << costLimit << "\r\n"
 for i in 0..numItems
 	array=Array.new
 	temp = i
@@ -28,7 +28,7 @@ for i in 0..numItems
 	end
 	myCost=rand(minCost..maxCost)
 	myVal = rand(minVal..maxVal)
-	nextLine= name+","+myCost.to_s+","+myVal.to_s+"\n"
+	nextLine= name+","+myCost.to_s+","+myVal.to_s+"\r\n"
 	fileOut<<nextLine
 end
 fileOut.close
