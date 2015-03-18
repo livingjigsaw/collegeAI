@@ -11,9 +11,9 @@ print "enter the number of items in the sack\n"
 numItems =gets.to_i
 fileOut = File.new("rubyKnapOut.csv", "w")
 #make a good costlimit
-costLimit=(numItems * (minCost+maxCost)/4).floor
+costLimit=(numItems * ((minCost+maxCost)/4+minCost)).floor
 fileOut << costLimit << "\r\n"
-for i in 0..numItems
+for i in 0..(numItems-1)
 	array=Array.new
 	temp = i
 	name=""

@@ -331,6 +331,16 @@ class Population{
 				//cout << "new generation\n";
 			}
 			cout << evalCount << " fitness evaluations performed\n";
+			int tsize= itemList.size(); 
+			if(tsize < 64){
+				unsigned long long int eCount=2; //to show the number of operations an exhaustive search would take
+				eCount = pow(eCount, tsize);
+				cout << eCount;
+			}
+			else{
+				cout << "2 ^ " << tsize;
+			}
+			cout << " exhaustive search nodes would have been needed\n";
 			cout << catams << " Catacalysmic Mutations\n";
 			cout << "Best Candidate:\n";
 			current[0]->print();

@@ -12,7 +12,7 @@ echo("enter the number of items in the sack\n");
 fscanf(STDIN, "%d\n", $numItems);
 $fileOut = fopen("phpKnapOut.csv", "w");
 //make a good costlimit
-$costLimit=floor($numItems*($minCost+$maxCost)/4);
+$costLimit=floor($numItems*(($minCost+$maxCost)/4+$minCost));
 $costLimit.="\r\n";
 fwrite($fileOut, $costLimit);
 for($i=0;$i<$numItems;$i++){

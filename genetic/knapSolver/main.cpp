@@ -39,7 +39,8 @@ bool parseFile(vector<knapItem*>* outList, int* outCost ){
 			tempItem->name=tempName;
 			tempItem->cost=tempCost;
 			tempItem->value=tempValue;
-			outList->insert(outList->end(), tempItem);		
+			outList->insert(outList->end(), tempItem);	
+			ss.clear();	
 		//	cout << "looping\n";
 		}
 		//cout << "out of parsing\n";
