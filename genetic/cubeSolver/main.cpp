@@ -56,7 +56,6 @@ int main(){
 	vector<piece*> tetrisPieces;
 
 	initPieces(tetrisPieces);
-	tetrisPieces[11]->baseConfig[5].print(); cout << endl;
 	srand(time(NULL));	//initialize the seed for pseudo-randomness
 	cout << "what size do you want the population to be?\n";
 	int popSize;

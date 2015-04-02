@@ -134,6 +134,17 @@ class Candidate{
 			baseStart[loc].randInit(0);
 			rotations[loc].randInit(1);
 		}
+		void simpleMutate(){
+			int loc = rand()%baseStart.size();
+			int loc2 = loc;
+			while(loc2==loc){
+				loc2 = rand()%baseStart.size();
+			}
+			coord temp;
+			temp = baseStart[loc];
+			baseStart[loc]=baseStart[loc2];
+			baseStart[loc2]=temp;
+		}
 
 		void operator=(Candidate &rhs){
 			fitness=rhs.get_fit();
@@ -336,8 +347,8 @@ class Population{
 				child->insert(current[p[parent]]->get_pieceBase(i), current[p[parent]]->get_pieceRot(i));
 			}
 			//possibility to mutate
-			if(rand()%100 < 5){
-				child->mutate();
+			if(rand()%100 < 20){
+				child->simpleMutate();
 			}
 			//eval fitness
 			fitEval(child);
@@ -415,6 +426,7 @@ class Population{
 				}
 				cataMutation();
 				catams++;
+				if(hmgCount%50 == 0)
 				cout << "fit = " << current[0]->get_fit() << " new generation\n";
 
 			}
