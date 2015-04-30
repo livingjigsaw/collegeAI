@@ -42,6 +42,7 @@ public:
 	int takeMove(std::string inBoard); //determine which move to make, make it, store in move history
 	void train(int winner); 	//this navigates the game history and makes the bots adjust appropriately
 	void clearHistory();
+	void printTraining();
 };
 
 class GameState{
@@ -56,6 +57,8 @@ private:
 	void resetGame(){board="         ";}
 public:
 	GameState(){}
+
+	Bot* get_bot(){return &myBot;}
 
 	int isOver();	//returns 0 if not over, 1 if x won, 2 if O won, and 3 if tie
 	void insertMove(int loc, bool player);	//0 for x, 1 for o

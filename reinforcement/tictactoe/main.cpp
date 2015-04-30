@@ -34,7 +34,7 @@ int main(){
 			cout << "Training complete! would you like to see my saturation levels?(y/n)\n";
 			cin >> inChar;
 			if(inChar=='y'){
-				//show change in probabilities
+				thisGame.get_bot()->printTraining();
 			}
 		}
 		else if(inString=="play"){

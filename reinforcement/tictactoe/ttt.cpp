@@ -2,10 +2,10 @@
 #include <cstdlib>
 #include "ttt.h"
 
-void InternalState::initAction(){
+void InternalState::initAction(){ 
 	for(int i=0;i<9;i++){	//boardstates will always be a length 9 string
 		if(boardState[i]==' '){
-			action[i] = 10;
+			action[i] = 50;
 		}
 		else{
 			action[i]=0;
@@ -80,11 +80,11 @@ int Bot::takeMove(std::string inBoard){
 
 void Bot::train(int winner){	//bot can only be trained if it played itself!!
 	for(int i=0;i<moveHistory.size();i++){ //moveHistory and actionHistory are the same size
-		if(i%2==(winner-1)){ //this allows for simple comparison to decide if current move helped win or lose
-			states[i]->modifyAction(i,true);
+		if(i%2==(winner-1)){ //this allows for simple comparison to decide if current move helped win or lose. x win = 1, so win-1=0, the first, thrid, and so on moves
+			states[moveHistory[i]]->modifyAction(actionHistory[i],true);	
 		}
 		else{
-			states[i]->modifyAction(i,false);
+			states[moveHistory[i]]->modifyAction(actionHistory[i],false);
 		}
 	}
 }
@@ -93,6 +93,19 @@ void Bot::clearHistory(){
 	moveHistory.clear();
 	actionHistory.clear();
 }
+
+void Bot::printTraining(){
+	std::cout << states.size() << "\n";
+	/*for(int i=0;i<states.size();i++){
+		std::cout << states[i]->get_board() << "\n";
+		for(int j=0;j<9;j++){
+			std::cout<< states[i]->get_actionChance(j)<<" ";
+		}
+		std::cout << "\n";
+	}
+	*/
+}
+
 
 int GameState::isOver(){
 
